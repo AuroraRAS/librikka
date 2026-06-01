@@ -1,11 +1,10 @@
 package rikka.librikka.model;
 
-
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.block.model.ItemTransform;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import com.mojang.math.Vector3f;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import org.joml.Vector3f;
 
 @SuppressWarnings("deprecation")
 @OnlyIn(Dist.CLIENT)

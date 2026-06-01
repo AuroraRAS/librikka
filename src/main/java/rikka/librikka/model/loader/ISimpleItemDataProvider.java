@@ -1,20 +1,21 @@
 package rikka.librikka.model.loader;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.item.Item;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.generators.BlockModelBuilder;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
+import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 /**
- * Implemented by super classes of net.minecraftforge.client.model.generators.BlockModelBuilder,
+ * Implemented by super classes of net.neoforged.neoforge.client.model.generators.BlockModelBuilder,
  * Provides an easier way to generate JSON models for simple items
  * @author Rikka0w0
  */
 public interface ISimpleItemDataProvider {
 	/*
-	 * These are implemented by import net.minecraftforge.client.model.generators.BlockModelBuilder;
+	 * These are implemented by net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
 	 */
 	BlockModelProvider models();
 	ResourceLocation mcLoc(String textureName);
@@ -38,8 +39,10 @@ public interface ISimpleItemDataProvider {
 	}
 	
 	default void registerSimpleItem(Item... items) {
-		for (Item item: items)
-			registerSimpleItem(item, "item/" + item.getRegistryName().getPath());
+		for (Item item: items) {
+			ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
+			registerSimpleItem(item, "item/" + key.getPath());
+		}
 	}
 	
 	default void registerSimpleItem(Item item, String textureName) {
@@ -47,7 +50,8 @@ public interface ISimpleItemDataProvider {
 	}
 	
 	default void registerSimpleItem(Item item, ResourceLocation texture) {
-		String itemModelPath = "item/"+item.getRegistryName().getPath();
+		ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
+		String itemModelPath = "item/" + key.getPath();
 		BlockModelBuilder itemModelBuilder = models().getBuilder(itemModelPath);
 		itemModelBuilder.parent(new ModelFile.ExistingModelFile(mcLoc("item/generated"), models().existingFileHelper));
 		itemModelBuilder.texture("layer0", texture);

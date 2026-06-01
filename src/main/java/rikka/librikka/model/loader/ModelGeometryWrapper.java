@@ -1,33 +1,29 @@
 package rikka.librikka.model.loader;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.IModelConfiguration;
-import net.minecraftforge.client.model.geometry.IModelGeometry;
+import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
+import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import rikka.librikka.model.CodeBasedModel;
 
-public class ModelGeometryWrapper implements IModelGeometry<ModelGeometryWrapper> {
+public class ModelGeometryWrapper implements IUnbakedGeometry<ModelGeometryWrapper> {
 	protected final Map<String, Material> textures = new HashMap<>();
 	protected final Function<ModelGeometryBakeContext, BakedModel> bakedModelSupplier;
 	protected final Map<Field, String> textureFields = new HashMap<>();
@@ -42,7 +38,7 @@ public class ModelGeometryWrapper implements IModelGeometry<ModelGeometryWrapper
 	}
 	
 	/**
-	 * An implementation of MinecraftForge's IModelGeometry, for easier dynamic model loading
+	 * An implementation of NeoForge's IUnbakedGeometry, for easier dynamic model loading
 	 * @param textureJsonObj A Json Object consists of TextureKey-ResourceLocation pairs
 	 * @param textureSupplier {@link rikka.librikka.model.loader.Mark}
 	 * @param scanEndClass if textureSupplier is not null, this field indicates 
@@ -62,7 +58,7 @@ public class ModelGeometryWrapper implements IModelGeometry<ModelGeometryWrapper
 			for (Entry<String, JsonElement> entry: textureJsonObj.entrySet()) {
 				String key = entry.getKey();
 				String textureLoc = entry.getValue().getAsString();
-				ResourceLocation textureResLoc = new ResourceLocation(textureLoc);
+				ResourceLocation textureResLoc = ResourceLocation.parse(textureLoc);
 				this.textures.put(key, new Material(atlasLoc, textureResLoc));
 			}
 		}
@@ -72,7 +68,7 @@ public class ModelGeometryWrapper implements IModelGeometry<ModelGeometryWrapper
 				String textureName = EasyTextureLoader.getMarkerValue(field);
 				if (!textureName.startsWith("#")) {
 					String key = "resloc#" + textureName.toString();
-					ResourceLocation textureResLoc = new ResourceLocation(textureName);
+					ResourceLocation textureResLoc = ResourceLocation.parse(textureName);
 					this.textures.put(key, new Material(atlasLoc, textureResLoc));
 				}
 				this.textureFields.put(field, textureName);
@@ -81,12 +77,12 @@ public class ModelGeometryWrapper implements IModelGeometry<ModelGeometryWrapper
 	}
 
 	@Override
-	public BakedModel bake(IModelConfiguration owner, ModelBakery bakery,
+	public BakedModel bake(IGeometryBakingContext owner, ModelBaker bakery,
 			Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
-			ItemOverrides overrides, ResourceLocation modelLocation) {
+			ItemOverrides overrides) {
 
 		final ModelGeometryBakeContext context = new ModelGeometryBakeContext(
-				owner, bakery, spriteGetter, modelTransform, overrides, modelLocation,
+				owner, bakery, spriteGetter, modelTransform, overrides, null,
 				this.textures);
 
 		final BakedModel model = bakedModelSupplier.apply(context);
@@ -97,7 +93,7 @@ public class ModelGeometryWrapper implements IModelGeometry<ModelGeometryWrapper
 	    		if (textureName.startsWith("#")) {
 	    			texture = context.getTextureByKey(textureName.substring(1));
 	    		} else {
-	    			texture = context.getTexture(new ResourceLocation(textureName));
+	    			texture = context.getTexture(ResourceLocation.parse(textureName));
 	    		}
 	    		EasyTextureLoader.applyTexture(model, field, texture);
 			});
@@ -106,11 +102,5 @@ public class ModelGeometryWrapper implements IModelGeometry<ModelGeometryWrapper
 		}
 
 		return model;
-	}
-
-	@Override
-	public Collection<Material> getTextures(IModelConfiguration owner,
-			Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
-		return this.textures.values();
 	}
 }

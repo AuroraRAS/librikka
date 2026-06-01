@@ -9,9 +9,8 @@ import com.google.common.primitives.Ints;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.pipeline.LightUtil;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class BakedQuadHelper {
@@ -60,7 +59,7 @@ public class BakedQuadHelper {
      * @param x
      * @param y
      * @param z
-     * @param color AARRGGBB, if you are not sure just put {@link java.awt.Color.WHITE.getRGB()}
+     * @param color AARRGGBB, if you are not sure just put {@link java.awt.Color#WHITE.getRGB()}
      * @param texture
      * @param u 0-16 exclusive
      * @param v 0-16 exclusive
@@ -138,6 +137,6 @@ public class BakedQuadHelper {
         float zn = xq*yp - yq*xp;
 
         //{xn, yn, zn} = normal vector
-        return LightUtil.toSide(xn, yn, zn);
+        return Direction.getNearest(xn, yn, zn);
     }
 }

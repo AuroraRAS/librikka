@@ -1,8 +1,8 @@
 package rikka.librikka.model.quadbuilder;
 
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import rikka.librikka.math.MathAssitant;
 
 @SuppressWarnings("unchecked")

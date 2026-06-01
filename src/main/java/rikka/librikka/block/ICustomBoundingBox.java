@@ -16,9 +16,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.DrawSelectionEvent;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public interface ICustomBoundingBox {
 	VoxelShape getBoundingShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context);
@@ -45,16 +45,16 @@ public interface ICustomBoundingBox {
 			f1 = f1 / f3;
 			f2 = f2 / f3;
 			vertexConsumer
-					.vertex(pose.pose(), (float) (p_172987_ + x), (float) (p_172988_ + y), (float) (p_172989_ + z))
-					.color(r, g, b, a).normal(pose.normal(), f, f1, f2).endVertex();
+					.addVertex(pose.pose(), (float) (p_172987_ + x), (float) (p_172988_ + y), (float) (p_172989_ + z))
+					.setColor(r, g, b, a).setNormal(pose, f, f1, f2);
 			vertexConsumer
-					.vertex(pose.pose(), (float) (p_172990_ + x), (float) (p_172991_ + y), (float) (p_172992_ + z))
-					.color(r, g, b, a).normal(pose.normal(), f, f1, f2).endVertex();
+					.addVertex(pose.pose(), (float) (p_172990_ + x), (float) (p_172991_ + y), (float) (p_172992_ + z))
+					.setColor(r, g, b, a).setNormal(pose, f, f1, f2);
 		});
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static void onBlockHighLight(DrawSelectionEvent event) {
+	public static void onBlockHighLight(RenderHighlightEvent.Block event) {
 		if (!(event.getTarget() instanceof BlockHitResult))
 			return;
 

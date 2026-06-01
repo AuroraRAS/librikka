@@ -1,22 +1,19 @@
 package rikka.librikka.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import rikka.librikka.Utils;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class GuiDirectionSelector extends AbstractWidget {
-	public static final Component defaultTitle = new TextComponent("GuiDirectionSelector");
+	public static final Component defaultTitle = Component.literal("GuiDirectionSelector");
     private static final int[][] rotationMatrix = {
             {2, 3, 4, 5},
             {3, 2, 5, 4},
@@ -57,10 +54,8 @@ public abstract class GuiDirectionSelector extends AbstractWidget {
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float p_render_3_) {
+    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (this.visible) {
-        	this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-
         	for (GuiDirectionSelector.GuiDirectionSelectorButton button: buttons) {
                 if (button.actualDirection == red)
                 	button.state = GuiDirectionSelector.GuiDirectionSelectorButton.STATE_RED;
@@ -71,7 +66,7 @@ public abstract class GuiDirectionSelector extends AbstractWidget {
                 else
                 	button.state = GuiDirectionSelector.GuiDirectionSelectorButton.STATE_NO_SELECTION;
 
-                button.render(matrixStack, mouseX, mouseY, p_render_3_);
+                button.render(guiGraphics, mouseX, mouseY, partialTick);
         	}
         }
     }
@@ -98,18 +93,18 @@ public abstract class GuiDirectionSelector extends AbstractWidget {
     }
 
 	@Override
-	public void updateNarration(NarrationElementOutput p_169152_) {
+	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
 	}
 
     protected abstract void onClick(Direction selectedDirection, int mouseButton);
     protected abstract ResourceLocation texture();
     protected Component localizeDirection(Direction direction) {
-    	return new TextComponent(direction.getSerializedName());
+    	return Component.literal(direction.getSerializedName());
     }
 
     public static final class GuiDirectionSelectorButton extends AbstractWidget {
-    	public static final Component defaultText = new TextComponent("");
+    	public static final Component defaultText = Component.literal("");
         public static final byte TYPE_HORIZONTAL = 0;
         public static final byte TYPE_VERTICAL = 1;
         public static final byte TYPE_UP = 2;
@@ -149,22 +144,21 @@ public abstract class GuiDirectionSelector extends AbstractWidget {
         }
 
         @Override
-		public void render(PoseStack matrixStack, int mouseX, int mouseY, float p_render_3_) {
+        protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             if (!visible || !active)
                 return;
 
-            if (parent.showTooltip && this.isMouseOver(mouseX, mouseY))
-            	Minecraft.getInstance().screen.renderTooltip(matrixStack, this.getMessage(), mouseX, mouseY);
-
-            RenderSystem.setShaderTexture(0, parent.texture());
-
             int u = GuiDirectionSelector.GuiDirectionSelectorButton.uList[state][type];
             int v = GuiDirectionSelector.GuiDirectionSelectorButton.vList[state][type];
-            blit(matrixStack, x, y, u, v, width, height);
+            guiGraphics.blit(parent.texture(), getX(), getY(), u, v, width, height);
+
+            if (parent.showTooltip && this.isMouseOver(mouseX, mouseY)) {
+                guiGraphics.renderTooltip(Minecraft.getInstance().font, this.getMessage(), mouseX, mouseY);
+            }
         }
 
 		@Override
-		public void updateNarration(NarrationElementOutput p_169152_) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
 		}
     }

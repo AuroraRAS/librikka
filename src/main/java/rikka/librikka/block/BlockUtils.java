@@ -6,7 +6,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
@@ -44,6 +43,6 @@ public class BlockUtils {
     	if (container != null)
     		return container.getDisplayName();
 
-    	return new TranslatableComponent(blockstate.getBlock().getDescriptionId());
+    	return Component.translatable(blockstate.getBlock().getDescriptionId());
     }
 }

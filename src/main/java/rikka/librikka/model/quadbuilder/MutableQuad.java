@@ -8,8 +8,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.core.Direction;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /** Modified from BuildCraft source code */
 @OnlyIn(Dist.CLIENT)
@@ -30,7 +30,7 @@ public class MutableQuad implements IRawGroupWrapper<MutableQuad, MutableVertex>
     	format = DefaultVertexFormat.BLOCK;
         tintIndex = quad.getTintIndex();
         face = quad.getDirection();
-        sprite = quad.getSprite();
+        sprite = (TextureAtlasSprite) quad.getSprite();
         shade = quad.isShade();
 
         int[] data = quad.getVertices();
@@ -75,7 +75,7 @@ public class MutableQuad implements IRawGroupWrapper<MutableQuad, MutableVertex>
     }
 
     public BakedQuad bake() {
-        int[] data = new int[format.getVertexSize()];
+        int[] data = new int[format.getVertexSize() / 4 * 4]; // format.getVertexSize() returns size in bytes, divide by 4 to get number of ints per vertex, multiply by 4 vertices
         int stride = data.length / 4;
         vertex_0.toBakedItem(data, 0);
         vertex_1.toBakedItem(data, stride);

@@ -1,13 +1,15 @@
 package rikka.librikka.mod;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ModelEvent;
 import rikka.librikka.model.GeneratedModelLoader;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = LibRikka.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(value = Dist.CLIENT, modid = LibRikka.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class ClientRegistrationHandler {
-	public static void registerModelLoaders() {
-		ModelLoaderRegistry.registerLoader(GeneratedModelLoader.id, GeneratedModelLoader.instance);
+	@SubscribeEvent
+	public static void registerModelLoaders(ModelEvent.RegisterGeometryLoaders event) {
+		event.register(GeneratedModelLoader.id, GeneratedModelLoader.instance);
 	}
 }

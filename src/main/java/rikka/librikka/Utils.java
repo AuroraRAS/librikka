@@ -10,19 +10,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.LogicalSidedProvider;
-import net.minecraftforge.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 public class Utils {
     private final static Direction[] horizontalDirections = new Direction[]{Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.EAST};
-    // SWNE
-    // 0123
 
     /**
      * @param player
@@ -61,10 +58,6 @@ public class Utils {
                     pos.getX() + rx, pos.getY() + ry, pos.getZ() + rz,
                     item.copy());
 
-            if (item.hasTag()) {
-                entityItem.getItem().setTag(item.getTag().copy());
-            }
-
             float factor = 0.05F;
             entityItem.setDeltaMovement(
             		rand.nextGaussian() * factor,
@@ -76,11 +69,11 @@ public class Utils {
     }
 
     public static void chat(Player player, String text) {
-        player.sendMessage(new TextComponent(text), net.minecraft.Util.NIL_UUID);
+        player.sendSystemMessage(Component.literal(text));
     }
 
     public static void chatWithLocalization(Player player, String text) {
-        player.sendMessage(new TranslatableComponent(text), net.minecraft.Util.NIL_UUID);
+        player.sendSystemMessage(Component.translatable(text));
     }
 
     public static void saveToNbt(CompoundTag nbt, String name, Direction facing) {

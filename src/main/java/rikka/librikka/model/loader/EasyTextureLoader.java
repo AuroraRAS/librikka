@@ -16,9 +16,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.TextureStitchEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class EasyTextureLoader {
@@ -65,7 +64,7 @@ public class EasyTextureLoader {
 	 * 1. # only: "#" followed by the field name<p>
 	 * 2. Otherwise: the value itself<p>
 	 * If the return value starts with #, it is a key. <p>
-	 * Otherwise it represents a {@link net.minecraft.resources.ResourceLocation} <p>
+	 * Otherwise it represents a {@link net.minecraft.resources.Identifier} <p>
 	 * null if the Mark annotation does not exist.
 	 */
 	@Nullable
@@ -87,7 +86,7 @@ public class EasyTextureLoader {
 	 * Rule:<p>
 	 * 1. Starts with #: Use the string after # as the key to retrieve texture from somewhere<p>
 	 * 2. # only: Use the field name as the key to retrieve texture from somewhere<p>
-	 * 3. Otherwise: parse as {@link net.minecraft.resources.ResourceLocation}, e.g. "domain:path"
+	 * 3. Otherwise: parse as {@link net.minecraft.resources.Identifier}, e.g. "domain:path"
 	 * @author Rikka0w0
 	 */
     @Retention(RetentionPolicy.RUNTIME)
@@ -99,10 +98,5 @@ public class EasyTextureLoader {
     @SuppressWarnings("deprecation")
 	public static Function<ResourceLocation, TextureAtlasSprite> blockTextureGetter() {
     	return Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS);
-    }
-
-    @SuppressWarnings("deprecation")
-	public static boolean isBlockAtlas(TextureStitchEvent event) {
-    	return event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS);
     }
 }

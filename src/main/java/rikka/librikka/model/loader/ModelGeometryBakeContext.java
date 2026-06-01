@@ -8,23 +8,23 @@ import org.apache.commons.lang3.tuple.Pair;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.IModelConfiguration;
+import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import rikka.librikka.DirHorizontal8;
 
 public class ModelGeometryBakeContext {
-	public final IModelConfiguration owner;
-	public final ModelBakery bakery;
+	public final IGeometryBakingContext owner;
+	public final ModelBaker bakery;
 	public final Function<Material, TextureAtlasSprite> spriteGetter;
 	public final ModelState modelTransform;
 	public final ItemOverrides overrides;
 	public final ResourceLocation modelLocation;
 	public final Map<String, Material> loadedTextures;
 	
-	public ModelGeometryBakeContext(IModelConfiguration owner, ModelBakery bakery,
+	public ModelGeometryBakeContext(IGeometryBakingContext owner, ModelBaker bakery,
 			Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
 			ItemOverrides overrides, ResourceLocation modelLocation,
 			Map<String, Material> loadedTextures) {

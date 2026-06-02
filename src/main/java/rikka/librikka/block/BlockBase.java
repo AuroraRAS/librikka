@@ -15,6 +15,7 @@ import rikka.librikka.item.ItemBlockBase;
 public abstract class BlockBase extends Block {
 	@Nullable
 	private final ItemBlockBase itemBlock;
+	public final String registryName;
 
 	public BlockBase(String regName, Block.Properties props, Item.Properties itemProps) {
 		this(regName, props, ItemBlockBase::new, itemProps);
@@ -27,6 +28,7 @@ public abstract class BlockBase extends Block {
 
     public BlockBase(String regName, Block.Properties props, ItemBlockBase.Constructor itemBlockProvider, Item.Properties itemProps) {
         super(props);
+        this.registryName = regName;
         this.itemBlock = itemBlockProvider == null ? null : itemBlockProvider.create(this, itemProps);
     }
 

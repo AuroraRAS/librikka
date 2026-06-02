@@ -36,5 +36,10 @@ public abstract class ContainerNoInventory<HOST> extends ContainerBase {
     }
 
     @Override
+    public net.minecraft.world.item.ItemStack quickMoveStack(Player player, int index) {
+        return net.minecraft.world.item.ItemStack.EMPTY;
+    }
+
+    @Override
     public abstract void broadcastChanges();
 }

@@ -3,8 +3,8 @@ package rikka.librikka.model.quadbuilder;
 import java.util.List;
 
 import net.minecraft.core.Direction;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * @author Rikka0w0

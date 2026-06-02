@@ -5,12 +5,21 @@ import java.util.function.Supplier;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import rikka.librikka.ByteSerializer;
 import rikka.librikka.container.ContainerSynchronizer;
 
-public abstract class MessageContainerSyncBase {
+public abstract class MessageContainerSyncBase implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<MessageContainerSyncBase> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("librikka", "container_sync"));
+
+	@Override
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+		return TYPE;
+	}
+
 	public static abstract class Processor<T extends MessageContainerSyncBase> {
 		protected Processor() {}
 
@@ -39,22 +48,20 @@ public abstract class MessageContainerSyncBase {
 			return msg;
 		}
 
-		public void handler(final T message, Supplier<NetworkEvent.Context> ctx) {
-			LogicalSide side = ctx.get().getDirection().getReceptionSide();
-			AbstractContainerMenu container = side.isClient() ? this.getClientPlayer().containerMenu
-					: ctx.get().getSender().containerMenu;
-			if (container.containerId != message.windowID)
-				return;
-
-			if (side.isServer()) {
-				// Make sure the actual modification is done on the server-thread.
-				ctx.get().enqueueWork(()->message.processServer(container));
-			}
-			else if (side.isClient()) {
-				ctx.get().enqueueWork(()->message.processClient(container));
-			}
-
-			ctx.get().setPacketHandled(true);
+		public void handler(final T message, IPayloadContext ctx) {
+			ctx.enqueueWork(() -> {
+				Player player = ctx.player();
+				if (player != null) {
+					AbstractContainerMenu container = player.containerMenu;
+					if (container != null && container.containerId == message.windowID) {
+						if (ctx.flow().getReceptionSide().isServer()) {
+							message.processServer(container);
+						} else {
+							message.processClient(container);
+						}
+					}
+				}
+			});
 		}
 
 		protected ByteSerializer getSerializer() {

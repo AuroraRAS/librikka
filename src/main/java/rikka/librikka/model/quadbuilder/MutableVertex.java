@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import rikka.librikka.math.ByteStream;
 import rikka.librikka.math.MathAssitant;
 
@@ -45,10 +45,10 @@ public class MutableVertex implements ITransformable<MutableVertex> {
     	stream.seek(offset*4);
     	boolean unsupported = false;
     	for (VertexFormatElement element: format.getElements()) {
-    		switch(element.getUsage()) {
+    		switch(element.usage()) {
 			case POSITION:
-				if (element.getType() == VertexFormatElement.Type.FLOAT &&
-					element.getElementCount() == 3) {
+				if (element.type() == VertexFormatElement.Type.FLOAT &&
+					element.count() == 3) {
 					// POSITION_3F
 					position_x = stream.getFloat();
 					position_y = stream.getFloat();
@@ -58,8 +58,8 @@ public class MutableVertex implements ITransformable<MutableVertex> {
 				}
 				break;
 			case COLOR:
-				if (element.getType() == VertexFormatElement.Type.UBYTE &&
-				element.getElementCount() == 4) {
+				if (element.type() == VertexFormatElement.Type.UBYTE &&
+				element.count() == 4) {
 			        // COLOR_4UB
 			        colouri(stream.getInt());
 				} else {
@@ -67,19 +67,19 @@ public class MutableVertex implements ITransformable<MutableVertex> {
 				}
 				break;
 			case UV:
-				if (element.getType() == VertexFormatElement.Type.FLOAT &&
-				element.getElementCount() == 2) {
+				if (element.type() == VertexFormatElement.Type.FLOAT &&
+				element.count() == 2) {
 			        // TEX_2F
 			        tex_u = stream.getFloat();
 			        tex_v = stream.getFloat();
 				} else {
-//					unsupported = true;
+					stream.skip(element.byteSize());
 					break;
 				}
 				break;
 			case NORMAL:
-				if (element.getType() == VertexFormatElement.Type.BYTE &&
-				element.getElementCount() == 3) {
+				if (element.type() == VertexFormatElement.Type.BYTE &&
+				element.count() == 3) {
 			        // NORMAL_3B
 			        normal_z = stream.getByte();
 			        normal_y = stream.getByte();
@@ -89,7 +89,7 @@ public class MutableVertex implements ITransformable<MutableVertex> {
 				}
 				break;
 			default:
-				stream.skip(element.getByteSize());
+				stream.skip(element.byteSize());
 				break;
     		};
     	}
@@ -138,10 +138,10 @@ public class MutableVertex implements ITransformable<MutableVertex> {
     	
     	stream.seek(offset*4);
     	for (VertexFormatElement element: format.getElements()) {
-    		switch(element.getUsage()) {
+    		switch(element.usage()) {
 			case POSITION:
-				if (element.getType() == VertexFormatElement.Type.FLOAT &&
-					element.getElementCount() == 3) {
+				if (element.type() == VertexFormatElement.Type.FLOAT &&
+					element.count() == 3) {
 					// POSITION_3F
 					stream.pushFloat(position_x);
 					stream.pushFloat(position_y);
@@ -151,8 +151,8 @@ public class MutableVertex implements ITransformable<MutableVertex> {
 				}
 				break;
 			case COLOR:
-				if (element.getType() == VertexFormatElement.Type.UBYTE &&
-				element.getElementCount() == 4) {
+				if (element.type() == VertexFormatElement.Type.UBYTE &&
+				element.count() == 4) {
 			        // COLOR_4UB
 			        stream.pushInt(colourRGBA());
 				} else {
@@ -160,22 +160,24 @@ public class MutableVertex implements ITransformable<MutableVertex> {
 				}
 				break;
 			case UV:
-				if (element.getType() == VertexFormatElement.Type.FLOAT &&
-				element.getElementCount() == 2) {
+				if (element.type() == VertexFormatElement.Type.FLOAT &&
+				element.count() == 2) {
 			        // TEX_2F
 					stream.pushFloat(tex_u);
 					stream.pushFloat(tex_v);
-				} else if (element.getType() == VertexFormatElement.Type.BYTE &&
-						element.getElementCount() == 2) {
+				} else if (element.type() == VertexFormatElement.Type.SHORT &&
+						element.count() == 2) {
 					// TEX_2SB
-					stream.pushShort((short) 1);
+					stream.pushShort((short) (light_block << 4));
+					stream.pushShort((short) (light_sky << 4));
 				} else {
+					stream.skip(element.byteSize());
 					break;
 				}
 				break;
 			case NORMAL:
-				if (element.getType() == VertexFormatElement.Type.BYTE &&
-				element.getElementCount() == 3) {
+				if (element.type() == VertexFormatElement.Type.BYTE &&
+				element.count() == 3) {
 			        // NORMAL_3B
 					stream.pushByte((byte) normal_z);
 					stream.pushByte((byte) normal_y);
@@ -185,7 +187,7 @@ public class MutableVertex implements ITransformable<MutableVertex> {
 				}
 				break;
 			default:
-				stream.skip(element.getByteSize());
+				stream.skip(element.byteSize());
 				break;
     		};
     	}

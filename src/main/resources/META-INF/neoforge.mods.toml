@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT License"
+
+[[mods]]
+modId="librikka"
+version="${file.jarVersion}"
+displayName="LibRikka"
+displayURL="https://github.com/rikka0w0/librikka"
+logoFile="logo.png"
+credits="Chinese Institution of Scientific Minecraft Mod (CISM)"
+authors="Rikka0_0"
+description='''
+A library of utilities, helpers, base classes and templates
+'''
+
+[[dependencies.librikka]]
+    modId="neoforge"
+    mandatory=true
+    versionRange="[21.1.80,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.librikka]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.21.1,)"
+    ordering="NONE"
+    side="BOTH"

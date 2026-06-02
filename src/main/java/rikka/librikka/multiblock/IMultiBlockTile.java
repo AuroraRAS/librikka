@@ -1,6 +1,6 @@
 package rikka.librikka.multiblock;
 
-import net.minecraftforge.client.model.data.ModelProperty;
+import net.neoforged.neoforge.client.model.data.ModelProperty;
 
 public interface IMultiBlockTile {
 	public static ModelProperty<IMultiBlockTile> prop  = new ModelProperty<>();

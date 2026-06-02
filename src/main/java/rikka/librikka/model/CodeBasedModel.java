@@ -4,17 +4,18 @@ import java.util.function.Function;
 
 import com.google.common.collect.ImmutableList;
 
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.client.model.data.IDynamicBakedModel;
-import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.model.IDynamicBakedModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import rikka.librikka.model.loader.EasyTextureLoader;
-import rikka.librikka.model.loader.IModelBakeHandler;
 import rikka.librikka.model.loader.ModelGeometryBakeContext;
 
 import java.lang.reflect.Field;
@@ -27,11 +28,9 @@ import java.util.Map;
  *
  * @author Rikka0_0
  */
-
-public abstract class CodeBasedModel implements IDynamicBakedModel, IModelBakeHandler {
+public abstract class CodeBasedModel implements IDynamicBakedModel {
 	public final static List<BakedQuad> emptyQuadList = ImmutableList.of();
 
-    ////////////////////////////////////////////////////////////////////////
     private final Map<ResourceLocation, Field> textures = new HashMap<>();
 
     protected CodeBasedModel() {
@@ -42,7 +41,6 @@ public abstract class CodeBasedModel implements IDynamicBakedModel, IModelBakeHa
     			// Skip all keys as they are not supported in the legacy texture registration scheme
     			if (!textureName.startsWith("#"))
     				this.textures.put(registerTexture(textureName), field);
-
     		});
     	}
     }
@@ -56,11 +54,11 @@ public abstract class CodeBasedModel implements IDynamicBakedModel, IModelBakeHa
      * @return a key which can be used to retrieve the corresponding TextureAtlasSprite (like IIcon)
      */
     protected ResourceLocation registerTexture(String texture) {
-    	return registerTexture(new ResourceLocation(texture));
+    	return registerTexture(ResourceLocation.parse(texture));
     }
 
     protected ResourceLocation registerTexture(String namespace, String texture) {
-        return registerTexture(new ResourceLocation(namespace, texture));
+        return registerTexture(ResourceLocation.fromNamespaceAndPath(namespace, texture));
     }
     
     protected ResourceLocation registerTexture(ResourceLocation resLoc) {
@@ -80,42 +78,6 @@ public abstract class CodeBasedModel implements IDynamicBakedModel, IModelBakeHa
     	return this;
     }
 
-    /////////////////
-    /// IModelBakeHandler, a temp replacement of 1.12.2 IModel
-    /////////////////
-	@SuppressWarnings("deprecation")
-	protected ResourceLocation atlasLocation() {
-		return TextureAtlas.LOCATION_BLOCKS;
-	}
-
-    @Override
-    public final void onPreTextureStitchEvent(TextureStitchEvent.Pre event) {
-    	if (!event.getAtlas().location().equals(atlasLocation()))
-    		return;
-
-    	for(ResourceLocation res: this.textures.keySet()) {
-    		event.addSprite(res);
-    	}
-    }
-
-    @Override
-    public final BakedModel onModelBakeEvent() {
-    	Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter = 
-    			Minecraft.getInstance().getTextureAtlas(atlasLocation());
-    	
-    	this.textures.forEach((resLoc, field)-> {
-    		if (field != null)
-    			EasyTextureLoader.applyTexture(this, field, bakedTextureGetter.apply(resLoc));
-    		}
-    	);
-    	
-        bake(bakedTextureGetter);
-        return this;
-    }
-
-    /////////////////
-    /// IDynamicBakedModel, was BakedModel
-    /////////////////
 	@Override
 	public boolean useAmbientOcclusion() {
 		return false;
@@ -127,7 +89,7 @@ public abstract class CodeBasedModel implements IDynamicBakedModel, IModelBakeHa
 	}
 
 	@Override
-	public boolean usesBlockLight() {	// was usesBlockLight
+	public boolean usesBlockLight() {
 		return false;
 	}
 
@@ -140,4 +102,16 @@ public abstract class CodeBasedModel implements IDynamicBakedModel, IModelBakeHa
     public ItemOverrides getOverrides() {
         return ItemOverrides.EMPTY;
     }
+
+    @Override
+    public List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource rand, ModelData extraData, RenderType renderType) {
+        return getQuads(state, side, rand, extraData);
+    }
+
+    @Override
+    public net.neoforged.neoforge.client.ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource rand, ModelData data) {
+        return net.neoforged.neoforge.client.ChunkRenderTypeSet.of(RenderType.solid(), RenderType.cutout(), RenderType.translucent());
+    }
+
+    public abstract List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource rand, ModelData extraData);
 }

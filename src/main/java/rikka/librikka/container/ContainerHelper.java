@@ -8,43 +8,26 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.MenuType.MenuSupplier;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.flag.FeatureFlags;
 import rikka.librikka.blockentity.BlockEntityHelper;
 
 public class ContainerHelper {
-	private static IForgeRegistry<MenuType<?>> registry;
 
 	@SuppressWarnings("unchecked")
 	public static <T extends AbstractContainerMenu> MenuType<T> getContainerType(String namespace, Class<T> containerClass) {
 		String clsName = BlockEntityHelper.getRegistryName(containerClass);
-		ResourceLocation res = new ResourceLocation(namespace, clsName);
+		ResourceLocation res = ResourceLocation.fromNamespaceAndPath(namespace, clsName);
 
-		if (registry == null) {
-			registry = RegistryManager.ACTIVE.getRegistry(MenuType.class);
-		}
-
-		return (MenuType<T>) registry.getValue(res);
+		return (MenuType<T>) BuiltInRegistries.MENU.get(res);
 	}
 
 	/**
-	 * Create a MenuType and register it with a default registry name
+	 * Create a MenuType with default feature flags
 	 */
 	public static <T extends AbstractContainerMenu> MenuType<T> of(Class<T> containerClass) {
-		String registryName = BlockEntityHelper.getRegistryName(containerClass);
-
 		ConstructorSupplier<T> constructorSupplier = new ConstructorSupplier<T>(containerClass);
-		MenuType<T> containerType = new MenuType<>(constructorSupplier);
-		containerType.setRegistryName(registryName);
-
-		return containerType;
-	}
-
-	public static <T extends AbstractContainerMenu> MenuType<T> register(
-			final IForgeRegistry<MenuType<?>> registry, Class<T> containerClass) {
-		MenuType<T> containerType = of(containerClass);
-		registry.register(containerType);
-		return containerType;
+		return new MenuType<>(constructorSupplier, FeatureFlags.DEFAULT_FLAGS);
 	}
 
     private static class ConstructorSupplier<T extends AbstractContainerMenu> implements MenuSupplier<T> {

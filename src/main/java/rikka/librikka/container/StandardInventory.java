@@ -9,7 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
-//import net.minecraft.network.chat.Component;
+import net.minecraft.core.HolderLookup;
 
 public class StandardInventory implements Container{
 	private final ItemStack[] itemStacks;
@@ -25,7 +25,7 @@ public class StandardInventory implements Container{
 		clearContent();
 	}
 	
-	public void readFromNBT(CompoundTag nbt) {
+	public void readFromNBT(HolderLookup.Provider registries, CompoundTag nbt) {
 		final byte NBT_TYPE_COMPOUND = 10;       // See NBTBase.createNewByType() for a listing
 		ListTag dataForAllSlots = nbt.getList("items", NBT_TYPE_COMPOUND);
 
@@ -35,18 +35,18 @@ public class StandardInventory implements Container{
 			int slotIndex = dataForOneSlot.getByte("slot") & 255;
 
 			if (slotIndex >= 0 && slotIndex < itemStacks.length) {
-				itemStacks[slotIndex] = ItemStack.of(dataForOneSlot);
+				itemStacks[slotIndex] = ItemStack.parse(registries, dataForOneSlot).orElse(ItemStack.EMPTY);
 			}
 		}
 	}
 	
-	public void writeToNBT(CompoundTag nbt)	{
+	public void writeToNBT(HolderLookup.Provider registries, CompoundTag nbt)	{
 		ListTag dataForAllSlots = new ListTag();
 		for (int i = 0; i < itemStacks.length; ++i) {
 			if (!itemStacks[i].isEmpty())	{ //isEmpty()
 				CompoundTag dataForThisSlot = new CompoundTag();
 				dataForThisSlot.putByte("slot", (byte) i);
-				itemStacks[i].save(dataForThisSlot);
+				itemStacks[i].save(registries, dataForThisSlot);
 				dataForAllSlots.add(dataForThisSlot);
 			}
 		}

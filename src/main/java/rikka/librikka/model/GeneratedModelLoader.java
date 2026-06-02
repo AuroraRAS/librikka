@@ -1,7 +1,6 @@
 package rikka.librikka.model;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 
 import com.google.common.collect.ImmutableList;
@@ -11,27 +10,22 @@ import com.google.gson.JsonObject;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.core.Direction;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.IModelLoader;
-import net.minecraftforge.client.model.data.IModelData;
+import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import rikka.librikka.mod.LibRikka;
 import rikka.librikka.model.loader.ModelGeometryWrapper;
 
-public class GeneratedModelLoader implements IModelLoader<ModelGeometryWrapper> {
-	public final static ResourceLocation id = new ResourceLocation(LibRikka.MODID, "generated");
+public class GeneratedModelLoader implements IGeometryLoader<ModelGeometryWrapper> {
+	public final static ResourceLocation id = ResourceLocation.fromNamespaceAndPath(LibRikka.MODID, "generated");
 	public final static GeneratedModelLoader instance = new GeneratedModelLoader();
 	public final static List<BakedQuad> emptyQuads = ImmutableList.of();
-	
-	@Override
-	public void onResourceManagerReload(ResourceManager resourceManager) {
-
-	}
 
 	@Override
-	public ModelGeometryWrapper read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
+	public ModelGeometryWrapper read(JsonObject modelContents, JsonDeserializationContext deserializationContext) {
 		String type = GsonHelper.getAsString(modelContents, "type");
 		JsonObject textures = GsonHelper.getAsJsonObject(modelContents, "textures");
 
@@ -40,7 +34,7 @@ public class GeneratedModelLoader implements IModelLoader<ModelGeometryWrapper> 
 				final TextureAtlasSprite particle = context.getTextureByKey("particle");
 				return new CodeBasedModel() {
 					@Override
-					public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand, IModelData extraData) {
+					public List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource rand, ModelData extraData) {
 						return emptyQuads;
 					}
 
@@ -57,7 +51,6 @@ public class GeneratedModelLoader implements IModelLoader<ModelGeometryWrapper> 
 			});
 		}
 
-
 		throw new RuntimeException("\"" + type + "\" is not implemented by " + id.toString());
 	}
 
@@ -70,7 +63,7 @@ public class GeneratedModelLoader implements IModelLoader<ModelGeometryWrapper> 
 	}
 	
 	public static JsonObject placeholder() {
-		return placeholder(new ResourceLocation("minecraft:block/iron_block"));
+		return placeholder(ResourceLocation.parse("minecraft:block/iron_block"));
 	}
 	
 	public static JsonObject placeholder(ResourceLocation particle) {

@@ -1,13 +1,12 @@
 package rikka.librikka.blockentity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
 
 public class BlockEntityHelper<T extends BlockEntity> {
 	private final BlockEntityType<T> beType;
@@ -36,30 +35,11 @@ public class BlockEntityHelper<T extends BlockEntity> {
 	}
 
 	/**
-	 * Create a BlockEntityType with registry name set.
+	 * Create a BlockEntityType.
 	 */
 	public static <T extends BlockEntity> BlockEntityType<T> of(Class<T> beClass,
 			BEConstructor<T> beConstructor, Block... validBlocks) {
-		String registryName = getRegistryName(beClass);
-		BlockEntityType<T> beType = (new BlockEntityHelper<T>(beConstructor, validBlocks)).beType;
-		beType.setRegistryName(registryName);
-		return beType;
-	}
-
-	/**
-	 * Create a BlockEntityType with registry name set and register it.
-	 */
-	public static <T extends BlockEntity> BlockEntityType<T> register(
-			IForgeRegistry<BlockEntityType<?>> registry, Class<T> beClass, BEConstructor<T> beConstructor,
-			Block... validBlocks) {
-		BlockEntityType<T> beType = BlockEntityHelper.of(beClass, beConstructor, validBlocks);
-
-		if (BlockEntityHelper.registry == null) {
-			BlockEntityHelper.registry = registry;
-		}
-
-		registry.register(beType);
-		return beType;
+		return (new BlockEntityHelper<T>(beConstructor, validBlocks)).beType;
 	}
 
 	/**
@@ -71,14 +51,7 @@ public class BlockEntityHelper<T extends BlockEntity> {
 	@SuppressWarnings("unchecked")
 	public static <T extends BlockEntity> BlockEntityType<T> getBEType(String namespace, Class<T> beClass) {
 		String clsName = BlockEntityHelper.getRegistryName(beClass);
-		ResourceLocation res = new ResourceLocation(namespace, clsName);
-
-		if (registry == null) {
-			registry = RegistryManager.ACTIVE.getRegistry(BlockEntityType.class);
-		}
-
-		return (BlockEntityType<T>) registry.getValue(res);
+		ResourceLocation res = ResourceLocation.fromNamespaceAndPath(namespace, clsName);
+		return (BlockEntityType<T>) BuiltInRegistries.BLOCK_ENTITY_TYPE.get(res);
 	}
-
-	private static IForgeRegistry<BlockEntityType<?>> registry;
 }

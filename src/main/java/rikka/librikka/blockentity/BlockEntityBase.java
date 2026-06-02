@@ -2,24 +2,22 @@ package rikka.librikka.blockentity;
 
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.ModelDataManager;
-import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.data.ModelDataMap;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 public abstract class BlockEntityBase extends BlockEntity {
 	public BlockEntityBase(BlockEntityType<?> teType, BlockPos pos, BlockState blockState) {
 		super(teType, pos, blockState);
 	}
 
-	// TODO: Check onChunkUnload()
     @Override
     public void onChunkUnloaded() {
         this.setRemoved();
@@ -32,7 +30,7 @@ public abstract class BlockEntityBase extends BlockEntity {
 
     @OnlyIn(Dist.CLIENT)
     protected void markForRenderUpdate() {
-    	ModelDataManager.requestModelDataRefresh(this);
+    	requestModelDataUpdate();
         level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
     }
 
@@ -52,21 +50,15 @@ public abstract class BlockEntityBase extends BlockEntity {
 
     @Override
     public final ClientboundBlockEntityDataPacket getUpdatePacket() {
-        //System.out.println("[DEBUG]:Server sent tile sync packet");
     	CompoundTag tagCompound = new CompoundTag();
         this.prepareS2CPacketData(tagCompound);
-        return ClientboundBlockEntityDataPacket.create(this, be->tagCompound);
+        return ClientboundBlockEntityDataPacket.create(this, (be, provider) -> tagCompound);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public final void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-
+    public final void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
         if (this.level.isClientSide) {
-            //System.out.println("[DEBUG]:Client recived INDIVIDUAL tileSync packet");	//Debug
-
-            //This is supposed to be Client ONLY!
-            //SPacketUpdateTileEntity starts with S, means that this packet is sent from server to client
             this.onSyncDataFromServerArrived(pkt.getTag());
         }
     }
@@ -75,49 +67,33 @@ public abstract class BlockEntityBase extends BlockEntity {
      * LevelChunk Sync
      */
     @Override
-    public final CompoundTag getUpdateTag() {
-    	CompoundTag nbt = super.getUpdateTag();
-
-        //Prepare custom payload
+    public final CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    	CompoundTag nbt = super.getUpdateTag(registries);
         this.prepareS2CPacketData(nbt);
-
         return nbt;
     }
 
     /**
-     * Called when the chunk's TE update tag, gotten from {@link #getUpdateTag()}, is received on the client.
-     * <p>
-     * Used to handle this tag in a special way. By default this simply calls {@link #readFromNBT(NBTTagCompound)}.
-     * This function should only be called by the client thread (I think
-     *
-     * @param tag The {@link NBTTagCompound} sent from {@link #getUpdateTag()}
+     * Called when the chunk's TE update tag, gotten from {@link #getUpdateTag(HolderLookup.Provider)}, is received on the client.
      */
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void handleUpdateTag(CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        super.handleUpdateTag(tag, registries);
 
         if (this.level.isClientSide) {
-            //System.out.println("[DEBUG]:Client recived CHUNK tileSync packet");	//Debug
-
             this.onSyncDataFromServerArrived(tag);
         }
     }
 
-    protected void collectModelData(ModelDataMap.Builder builder) {
+    protected void collectModelData(ModelData.Builder builder) {
 
     }
 
     @Override
-    public final IModelData getModelData() {
-    	ModelDataMap.Builder builder = new ModelDataMap.Builder();
+    public final ModelData getModelData() {
+    	ModelData.Builder builder = ModelData.builder();
     	collectModelData(builder);
     	return builder.build();
-    }
-
-    // TODO: Fix BlockEntity::getViewDistance
-    @OnlyIn(Dist.CLIENT)
-    public double getViewDistance() {
-        return 100000;
     }
 }

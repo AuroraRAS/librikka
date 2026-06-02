@@ -1,9 +1,9 @@
 package rikka.librikka.gui;
 
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.ModLoadingContext;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,6 +11,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -46,7 +47,18 @@ public class AutoGuiHandler {
 	public static <TC extends AbstractContainerMenu, TS extends AbstractContainerScreen<TC>>
 	void registerContainerGui(String namespace, Class<TC> containerClass, Class<TS> screenClass) {
 		MenuType<TC> containerType = ContainerHelper.getContainerType(namespace, containerClass);
-		MenuScreens.register(containerType, new ConstructorSupplier<TC, TS>(containerClass, screenClass));
+		
+		try {
+			Method registerMethod = MenuScreens.class.getDeclaredMethod(
+				"register", 
+				MenuType.class, 
+				MenuScreens.ScreenConstructor.class
+			);
+			registerMethod.setAccessible(true);
+			registerMethod.invoke(null, containerType, new ConstructorSupplier<TC, TS>(containerClass, screenClass));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to register Screen via reflection in AutoGuiHandler", e);
+		}
 	}
 
 	private static class ConstructorSupplier<TC extends AbstractContainerMenu, TS extends AbstractContainerScreen<TC>>

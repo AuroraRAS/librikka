@@ -11,8 +11,5 @@ public class ItemBlockBase extends BlockItem {
 
     public ItemBlockBase(Block block, Item.Properties props) {
     	super(block, props);
-
-        this.setRegistryName(block.getRegistryName());
-        // localization key: item.<MODID>.<name>
     }
 }

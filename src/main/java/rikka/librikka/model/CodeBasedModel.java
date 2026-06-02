@@ -108,5 +108,10 @@ public abstract class CodeBasedModel implements IDynamicBakedModel {
         return getQuads(state, side, rand, extraData);
     }
 
+    @Override
+    public net.neoforged.neoforge.client.ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource rand, ModelData data) {
+        return net.neoforged.neoforge.client.ChunkRenderTypeSet.of(RenderType.solid(), RenderType.cutout(), RenderType.translucent());
+    }
+
     public abstract List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource rand, ModelData extraData);
 }

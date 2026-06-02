@@ -73,7 +73,7 @@ public class MutableVertex implements ITransformable<MutableVertex> {
 			        tex_u = stream.getFloat();
 			        tex_v = stream.getFloat();
 				} else {
-//					unsupported = true;
+					stream.skip(element.byteSize());
 					break;
 				}
 				break;
@@ -165,11 +165,13 @@ public class MutableVertex implements ITransformable<MutableVertex> {
 			        // TEX_2F
 					stream.pushFloat(tex_u);
 					stream.pushFloat(tex_v);
-				} else if (element.type() == VertexFormatElement.Type.BYTE &&
+				} else if (element.type() == VertexFormatElement.Type.SHORT &&
 						element.count() == 2) {
 					// TEX_2SB
-					stream.pushShort((short) 1);
+					stream.pushShort((short) (light_block << 4));
+					stream.pushShort((short) (light_sky << 4));
 				} else {
+					stream.skip(element.byteSize());
 					break;
 				}
 				break;

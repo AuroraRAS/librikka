@@ -12,4 +12,12 @@ public class ClientRegistrationHandler {
 	public static void registerModelLoaders(ModelEvent.RegisterGeometryLoaders event) {
 		event.register(GeneratedModelLoader.id, GeneratedModelLoader.instance);
 	}
+
+	@EventBusSubscriber(value = Dist.CLIENT, modid = LibRikka.MODID, bus = EventBusSubscriber.Bus.GAME)
+	public static class GameBusEvents {
+		@SubscribeEvent
+		public static void onBlockHighLight(net.neoforged.neoforge.client.event.RenderHighlightEvent.Block event) {
+			rikka.librikka.block.ICustomBoundingBox.onBlockHighLight(event);
+		}
+	}
 }

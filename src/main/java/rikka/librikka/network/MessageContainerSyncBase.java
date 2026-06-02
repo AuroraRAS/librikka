@@ -49,18 +49,19 @@ public abstract class MessageContainerSyncBase implements CustomPacketPayload {
 		}
 
 		public void handler(final T message, IPayloadContext ctx) {
-			LogicalSide side = ctx.flow().getReceptionSide();
-			AbstractContainerMenu container = ctx.player().containerMenu;
-			if (container.containerId != message.windowID)
-				return;
-
-			if (side.isServer()) {
-				// Make sure the actual modification is done on the server-thread.
-				ctx.enqueueWork(()->message.processServer(container));
-			}
-			else if (side.isClient()) {
-				ctx.enqueueWork(()->message.processClient(container));
-			}
+			ctx.enqueueWork(() -> {
+				Player player = ctx.player();
+				if (player != null) {
+					AbstractContainerMenu container = player.containerMenu;
+					if (container != null && container.containerId == message.windowID) {
+						if (ctx.flow().getReceptionSide().isServer()) {
+							message.processServer(container);
+						} else {
+							message.processClient(container);
+						}
+					}
+				}
+			});
 		}
 
 		protected ByteSerializer getSerializer() {

@@ -49,12 +49,18 @@ public class ModelGeometryBakeContext {
 
 	public TextureAtlasSprite getTextureByKey(String name) {
 		Material material = this.loadedTextures.get(name);
+		if (material == null && this.owner.hasMaterial(name)) {
+			material = this.owner.getMaterial(name);
+		}
 		return material == null ? null : this.spriteGetter.apply(material);
 	}
 	
 	public TextureAtlasSprite getTexture(ResourceLocation resLoc) {
 		Material material = this.loadedTextures.get("resloc#" + resLoc.toString());
-		return material == null ? null : this.spriteGetter.apply(material);
+		if (material == null) {
+			material = new Material(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS, resLoc);
+		}
+		return this.spriteGetter.apply(material);
 	}
 
 	public Function<ResourceLocation, TextureAtlasSprite> textureGetter() {

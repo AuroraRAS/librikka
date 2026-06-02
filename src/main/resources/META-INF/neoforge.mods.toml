@@ -16,14 +16,14 @@ A library of utilities, helpers, base classes and templates
 
 [[dependencies.librikka]]
     modId="neoforge"
-    type="required"
+    mandatory=true
     versionRange="[21.1.80,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.librikka]]
     modId="minecraft"
-    type="required"
+    mandatory=true
     versionRange="[1.21.1,)"
     ordering="NONE"
     side="BOTH"
